@@ -1,0 +1,165 @@
+Geological Prediction
+Here's a link that might be worth having a look at: http://geospatial-solutions.com/tag/crowdsourcing/
+Also... I saw that the folks at IBM and GoldCorp put something out on their project at Red Lake.  I thought you might be interested.. it is a good explanation of what I want to do/why I decided to take this course.  It kind of gives you an idea of the kinds of things that I am hoping to learn/and maybe incorporate if possible into the case study... even if in a small way... https://www-01.ibm.com/common/ssi/cgi-bin/ssialias?htmlfid=73015073USEN
+www-01.ibm.com
+Using Big Data and AI for Smarter Mineral Exploration
+Advanced technologies like AI and Big Data processing is transforming exploration.
+
+
+US Aid impact on local economies 
+Based on the data available, what kind of affect is US foreign aid having on local economies? Is it positive or negative? 
+Dr. Scotts Project
+It is an ongoing project in his research lab, so I'm not sure how that would be different than other project ideas, but I wanted to make sure you got that information as well. I'm pasting that below this message
+
+In our digital society, with its ubiquitous network-connected mobile devices, we have become increasingly reliant on having geospatial information at our fingertips. We use this information for personal navigation, location-based services (e.g., weather alerts, traffic information, etc.), and location-aware search results. As a consequence, service providers have created numerous methods to accept feedback, refinement, and even new data from the crowd of users (crowd-sourcing). Of particular interest are voluntary geospatial information (VGI) sites that provide both web and API access to data. In this project, we have ingested large geographic regions of VGI into a system that supports multi-modal analytics. Specifically, we intake a variety of auxiliary semantic and contextual information about geospatial places of interest, such as free text annotations, user-supplied images (ground photos), place information (anthropogenic use) and other metadata. Our crowd-sourced information miner (CIM) system enables linked analysis of the VGI combining techniques such as geospatial queries (time, space), metadata filtering, natural language processing (topic, entity, and sentiment analysis), information retrieval (search engine style access), and visual analytics (deep machine learning image matching of ground photos). --- Here is a suggestion for a case study project for a group of 3-4
+The case study will be to do the following: 1) Review and understand the database design, including some of the DBMS extensions 2) Run data ingestion over the State of Missouri and potentially another state of interest. 3) Formulate a set of Candidate Questions that can be answered from the data 4) Explore the collected data in one or two modalities (metadata, text analytics, geospatially, etc.) to determine which candidate questions can be answered 5) Develop data storyboards to answer one or two key questions from the data.
+http://wikimapia.org
+https://github.com/scottgs/opensat
+/******************
+CREATE SCHEMA 
+*********************/
+DROP SCHEMA IF EXISTS cim CASCADE;
+
+CREATE SCHEMA cim;
+
+
+/************************
+Strong Entities
+*************************/
+CREATE TABLE cim.location (
+    loc_id bigint PRIMARY KEY,
+    wikimapia_loc_id bigint NOT NULL,
+    name text NOT NULL,
+    language text,
+    country text,
+    state text,
+    place text,
+    city text
+);
+
+CREATE TABLE cim.categories (
+    cat_id integer PRIMARY KEY,
+    cat_name text NOT NULL
+);
+
+/************************
+Dependent on (only) Categories
+**************************/
+
+CREATE TABLE cim.sub_categories (
+    sub_id integer PRIMARY KEY,
+    cat_id integer,
+    sub_name text NOT NULL,
+
+    FOREIGN KEY(cat_id) REFERENCES cim.categories
+);
+
+/************************
+Dependent on Both Categories and Location
+*************************/
+
+
+CREATE TABLE cim.tags (
+    loc_id bigint,
+    cat_id integer,
+    PRIMARY KEY(loc_id, cat_id),
+    FOREIGN KEY(loc_id) REFERENCES cim.location,
+    FOREIGN KEY(cat_id) REFERENCES cim.categories
+);
+
+/**********************
+Dependent only on Location
+************************/
+
+
+CREATE TABLE cim.boundary (
+    bound_id bigint PRIMARY KEY,
+    loc_id bigint,
+    vertices geometry NOT NULL,
+    
+    FOREIGN KEY(loc_id) REFERENCES cim.location
+);
+
+
+CREATE TABLE cim.contribution (
+    con_id bigint PRIMARY KEY,
+    loc_id bigint,
+    FOREIGN KEY(loc_id) REFERENCES cim.location
+     
+);
+
+CREATE TABLE cim.point (
+    point_id bigint PRIMARY KEY,
+    loc_id bigint,
+    lat_lon geometry NOT NULL,
+    radius real,
+    north real,
+    south real,
+    east real,
+    west real,
+    FOREIGN KEY(loc_id) REFERENCES cim.location
+);
+
+/***********************
+Dependent on Contribution
+*************************/
+
+
+
+CREATE TABLE cim.comments (
+    comment_id bigint PRIMARY KEY,
+    con_id bigint,
+    username text NOT NULL,
+    comment_text text NOT NULL,
+    FOREIGN KEY(con_id) REFERENCES cim.contribution
+);
+
+
+
+CREATE TABLE cim.contribution_image (
+    con_img_id bigint PRIMARY KEY,
+    con_id bigint,
+    nas_filepath text NOT NULL,
+    thumbnail_url text,
+    big_photo_url text,
+    retina_thumbnail_url text,
+    FOREIGN KEY(con_id) REFERENCES cim.contribution
+);
+
+CREATE TABLE cim.description (
+    dsc_id bigint PRIMARY KEY,
+    con_id bigint,
+    dsc_text text NOT NULL,
+    article_url text,
+    FOREIGN KEY(con_id) REFERENCES cim.contribution
+);
+
+CREATE TABLE cim.sources (
+    src_id bigint PRIMARY KEY,
+    con_id bigint,
+    source text,
+    source_url text,
+
+    FOREIGN KEY(con_id) REFERENCES cim.contribution
+);
+
+/*******************
+Dependent on contribution image
+********************/
+
+CREATE TABLE cim.contribution_image_patches (
+    con_patch_id bigint PRIMARY KEY,
+    con_img_id bigint,
+    vector geometry NOT NULL,
+    patch text NOT NULL,
+    FOREIGN KEY(con_img_id) REFERENCES cim.contribution_image
+);
+
+
+/***************
+Set seach path
+****************/
+SET search_path = cim, public;
+
+
+geospatial, remote sensing, and either predictive analysis or machine learning, HPC?
