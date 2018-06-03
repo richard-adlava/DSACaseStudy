@@ -5,3 +5,4 @@ Data libraries and sources from Dr. Scott:
 - https://github.com/scottgs/opensat
 
 Nicole was here.
+Lori was here.
